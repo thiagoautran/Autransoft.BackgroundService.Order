@@ -9,7 +9,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
     {
         private static List<WorkerEntity> _database;
 
-        public static List<WorkerEntity> Database
+        private static List<WorkerEntity> Database
         {
             get
             {
@@ -20,11 +20,23 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
             }
         }
 
+        public int GetKey(Type type)
+        {
+            for(var i = 0; i < Database.Count(); i++)
+                if(Database.ElementAt(i).Type == type)
+                    return i;
+
+            return 0;
+        }
+
         public bool AllDependencyExecuted(Type worker)
         {
             var key = GetWorker(worker);
             if(key == null)
                 return false;
+
+            if(key.Dependencies.Count() == 0)
+                return true;
                 
             return !key.Dependencies.Any(dependency => !dependency.Executed);
         }
@@ -36,13 +48,34 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
             AddDependency(worker, dependency);
         }
 
-        public void UpdateWorker(Type worker, bool executed)
-        {
-            var key = GetWorker(worker);
-            if(key == null)
-                return;
+        public WorkerEntity Get(Type type) => Database.FirstOrDefault(database => database.Type == type);
 
-            key.Executed = executed;
+        public IEnumerable<WorkerEntity> Get() => Database;
+
+        public WorkerEntity UpdateWorker(Type type, bool executed)
+        {
+            var worker = GetWorker(type);
+            if(worker == null)
+                return null;
+
+            worker.Executed = executed;
+
+            return worker;
+        }
+
+        public WorkerEntity Add(Type type)
+        {
+            if(type == null)
+                return null;
+
+            if(Database.Any(database => database.Type == type))
+                return null;
+
+            var worker = new WorkerEntity(type);
+
+            Database.Add(worker);
+
+            return worker;
         }
 
         private WorkerEntity GetWorker(Type worker)
@@ -52,15 +85,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
 
             return Database.FirstOrDefault(key => key.Type == worker);
         } 
-
-        private void Add(Type worker)
-        {
-            if(worker == null)
-                return;
-
-            if(!Database.Any(database => database.Type == worker))
-                Database.Add(new WorkerEntity(worker));
-        }
 
         private void AddDependency(Type worker, Type dependency)
         {
