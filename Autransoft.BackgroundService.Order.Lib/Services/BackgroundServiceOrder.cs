@@ -1,42 +1,26 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Autransoft.BackgroundService.Order.Lib.Attributes;
-using Autransoft.BackgroundService.Order.Lib.Entities;
-using Autransoft.BackgroundService.Order.Lib.Logging;
-using Autransoft.BackgroundService.Order.Lib.Repositories;
+using Autransoft.BackgroundService.Order.Lib.Extensions;
 
 namespace Autransoft.BackgroundService.Order.Lib.Services
 {
     public abstract class BackgroundServiceOrder : Microsoft.Extensions.Hosting.BackgroundService
     {
         private TimeSettingAttribute _timeSetting;
-        private WorkerRepository _repository;
-        private Logger _logger;
+        private WorkerOrderService _service;
+
+        public BackgroundServiceOrder() => _service = new WorkerOrderService();
 
         public async override Task StartAsync(CancellationToken cancellationToken)
         {
-            _repository = new WorkerRepository();
-            _logger = new Logger();
+            _timeSetting = GetType().GetTimeSetting();
 
-            _timeSetting = Attribute.GetCustomAttributes(GetType())
-                .Where(attribute => attribute is TimeSettingAttribute)
-                .Select(attribute => (attribute as TimeSettingAttribute))
-                .FirstOrDefault();
+            _service.Save(GetType());
 
-            var dependencies = Attribute.GetCustomAttributes(GetType())
-                .Where(attribute => attribute is DependencyWorkerAttribute)
-                .Select(attribute => (attribute as DependencyWorkerAttribute).Type);
+            await BackgroundStartAsync(cancellationToken);
 
-            WorkerEntity worker = null;
-            if(dependencies == null || dependencies.Count() == 0)
-                worker = _repository.Add(GetType());
-            else
-                foreach(var dependency in dependencies)
-                    _repository.Add(GetType(), dependency);
-
-            _logger.LogInformation(worker);
             await base.StartAsync(cancellationToken);
         }
 
@@ -44,10 +28,10 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
         {
             while (_timeSetting != null && !stoppingToken.IsCancellationRequested)
             {
-                if(!_repository.Get(GetType()).Executed)
+                if(!_service.Executed(GetType()))
                     continue;
 
-                if(!_repository.AllDependencyExecuted(GetType()))
+                if(!_service.AllDependencyExecuted(GetType()))
                     continue;
 
                 if(!(await BackgroundExecuteAsync(stoppingToken)))
@@ -56,32 +40,27 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                     continue;
                 }
 
-                EndExecutionAsync();
-                await RestartAllWorkersAsync(stoppingToken);
+                _service.EndExecution();
+
+                await Task.Delay(new TimeSpan(0, 0, _service.GetIndex(GetType())), stoppingToken);
+
+                _service.RestartAllWorkers();
+
                 await Task.Delay(_timeSetting.TimeBetweenExecution, stoppingToken);
             }
         }
 
-        protected abstract Task<bool> BackgroundExecuteAsync(CancellationToken stoppingToken);
-
-        private void EndExecutionAsync()
+        public async override Task StopAsync(CancellationToken cancellationToken)
         {
-            var worker = _repository.UpdateWorker(GetType(), true);
-            _logger.LogInformation(worker);
-        }
-
-        private async Task RestartAllWorkersAsync(CancellationToken stoppingToken)
-        {
-            await Task.Delay(new TimeSpan(0, 0, _repository.GetKey(GetType())), stoppingToken);
-
-            var workers = _repository.Get();
-            if(workers.Any(worker => !worker.Executed))
-                return;
+            await BackgroundStopAsync(cancellationToken);
             
-            foreach(var worker in workers)
-                _repository.UpdateWorker(worker.Type, false);
-
-            _logger.Restart(workers);
+            await base.StopAsync(cancellationToken);
         }
+
+        public virtual async Task BackgroundStartAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
+
+        public virtual async Task BackgroundStopAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
+
+        protected abstract Task<bool> BackgroundExecuteAsync(CancellationToken stoppingToken);
     }
 }

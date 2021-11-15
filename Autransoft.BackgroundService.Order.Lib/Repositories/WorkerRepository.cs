@@ -20,7 +20,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
             }
         }
 
-        public int GetKey(Type type)
+        public int GetIndex(Type type)
         {
             for(var i = 0; i < Database.Count(); i++)
                 if(Database.ElementAt(i).Type == type)
