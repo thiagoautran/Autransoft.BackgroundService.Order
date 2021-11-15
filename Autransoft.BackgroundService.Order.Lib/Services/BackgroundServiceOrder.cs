@@ -15,8 +15,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             _service.Save(GetType());
 
             await BackgroundStartAsync(cancellationToken);
-
-            await base.StartAsync(cancellationToken);
         }
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -40,16 +38,11 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             }
         }
 
-        public async override Task StopAsync(CancellationToken cancellationToken)
-        {
-            await BackgroundStopAsync(cancellationToken);
-            
-            await base.StopAsync(cancellationToken);
-        }
+        public async override Task StopAsync(CancellationToken cancellationToken) => await BackgroundStopAsync(cancellationToken);
 
-        public virtual async Task BackgroundStartAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
+        public virtual Task BackgroundStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-        public virtual async Task BackgroundStopAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
+        public virtual Task BackgroundStopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         protected abstract Task<bool> BackgroundExecuteAsync(CancellationToken stoppingToken);
     }
