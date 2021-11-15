@@ -3,8 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autransoft.BackgroundService.Order.Lib.Attributes;
 using Autransoft.BackgroundService.Order.Lib.Extensions;
+using Autransoft.BackgroundService.Order.Lib.Services;
 
-namespace Autransoft.BackgroundService.Order.Lib.Services
+namespace Autransoft.Services
 {
     public abstract class BackgroundServiceOrder : Microsoft.Extensions.Hosting.BackgroundService
     {
