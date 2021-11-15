@@ -21,7 +21,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if(!_service.Executed(GetType()))
+                if(_service.Executed(GetType()))
                     continue;
 
                 if(!_service.AllDependencyExecuted(GetType()))

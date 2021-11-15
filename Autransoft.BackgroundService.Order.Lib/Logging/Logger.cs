@@ -34,7 +34,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Logging
             if(worker.Dependencies.Count() == 0)
                 Console.WriteLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}");
             else
-                Console.WriteLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{worker.Dependencies.Select(x => x.Type.Name)}");
+                Console.WriteLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
         }
     }
 }
