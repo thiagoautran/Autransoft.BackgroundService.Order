@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Autransoft.BackgroundService.Order.Lib.Attributes;
-using Autransoft.BackgroundService.Order.Lib.Entities;
 using Autransoft.BackgroundService.Order.Lib.Logging;
 using Autransoft.BackgroundService.Order.Lib.Repositories;
 
@@ -42,10 +41,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 .Where(attribute => attribute is DependencyWorkerAttribute)
                 .Select(attribute => (attribute as DependencyWorkerAttribute).Type);
 
-            WorkerEntity worker = null;
-            if(dependencies == null || dependencies.Count() == 0)
-                worker = _repository.Add(type);
-            else
+            var worker = _repository.Add(type);
+            if(dependencies != null)
                 foreach(var dependency in dependencies)
                     _repository.Add(type, dependency);
 
