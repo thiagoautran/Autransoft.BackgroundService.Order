@@ -1,23 +1,17 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Autransoft.BackgroundService.Order.Lib.Attributes;
-using Autransoft.BackgroundService.Order.Lib.Extensions;
-using Autransoft.BackgroundService.Order.Lib.Services;
 
-namespace Autransoft.Services
+namespace Autransoft.BackgroundService.Order.Lib.Services
 {
     public abstract class BackgroundServiceOrder : Microsoft.Extensions.Hosting.BackgroundService
     {
-        private TimeSettingAttribute _timeSetting;
         private WorkerOrderService _service;
 
-        public BackgroundServiceOrder() => _service = new WorkerOrderService();
+        public BackgroundServiceOrder() : base() => _service = new WorkerOrderService();
 
         public async override Task StartAsync(CancellationToken cancellationToken)
         {
-            _timeSetting = GetType().GetTimeSetting();
-
             _service.Save(GetType());
 
             await BackgroundStartAsync(cancellationToken);
@@ -27,7 +21,7 @@ namespace Autransoft.Services
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (_timeSetting != null && !stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 if(!_service.Executed(GetType()))
                     continue;
@@ -36,18 +30,13 @@ namespace Autransoft.Services
                     continue;
 
                 if(!(await BackgroundExecuteAsync(stoppingToken)))
-                {
-                    await Task.Delay(_timeSetting.TimeBetweenExecution, stoppingToken);
                     continue;
-                }
 
                 _service.EndExecution();
 
                 await Task.Delay(new TimeSpan(0, 0, _service.GetIndex(GetType())), stoppingToken);
 
                 _service.RestartAllWorkers();
-
-                await Task.Delay(_timeSetting.TimeBetweenExecution, stoppingToken);
             }
         }
 

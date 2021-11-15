@@ -7,7 +7,7 @@ using Autransoft.BackgroundService.Order.Lib.Repositories;
 
 namespace Autransoft.BackgroundService.Order.Lib.Services
 {
-    internal class WorkerOrderService
+    public class WorkerOrderService
     {
         private WorkerRepository _repository;
         private Logger _logger;
