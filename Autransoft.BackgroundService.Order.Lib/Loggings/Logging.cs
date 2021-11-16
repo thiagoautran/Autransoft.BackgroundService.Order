@@ -25,7 +25,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
             var log = new StringBuilder();
             _logId = Guid.NewGuid();
             
-            log.AppendLine("Restart");
+            log.AppendLine("Restart started");
 
             foreach(var worker in workers)
             {
@@ -35,19 +35,21 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
                     log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
             }
 
+            log.Append("Restart finished");
+
             Console.WriteLine(log.ToString());
         }
 
         internal void LogStatusWorkerOrder(WorkerEntity worker)
         {
-            var log = new StringBuilder();
+            var log = string.Empty;
 
             if(worker.Dependencies.Count() == 0)
-                log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}");
+                log = $"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}";
             else
-                log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
+                log = $"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}";
 
-            Console.WriteLine(log.ToString());
+            Console.WriteLine(log);
         }
     }
 }
