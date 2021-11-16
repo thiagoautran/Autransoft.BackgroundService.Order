@@ -30,18 +30,26 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
         public void RestartAllWorkers()
         {
+            if(_isRestartAllWorkersRunnig)
+                return;
+
             _isRestartAllWorkersRunnig = true;
 
-            var workers = _repository.Get();
-            if(workers.Any(worker => !worker.Executed))
-                return;
-            
-            foreach(var worker in workers)
-                _repository.UpdateWorker(worker.Type, false);
+            try
+            {
+                var workers = _repository.Get();
+                if(workers.Any(worker => !worker.Executed))
+                    return;
+                
+                foreach(var worker in workers)
+                    _repository.UpdateWorker(worker.Type, false);
 
-            _logger.LogRestart(workers);
-
-            _isRestartAllWorkersRunnig = false;
+                _logger.LogRestart(workers);
+            }
+            finally
+            {
+                _isRestartAllWorkersRunnig = false;
+            }
         }
 
         public void Save(Type type)

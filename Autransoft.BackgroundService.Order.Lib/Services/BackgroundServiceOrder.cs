@@ -21,10 +21,16 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             {
                 var executed = _service.Executed(GetType());
                 if(executed != null && executed.Value)
+                {
+                    await Task.Delay(new TimeSpan(0, 0, 1), stoppingToken);
                     continue;
+                }
 
                 if(!_service.AllDependencyExecuted(GetType()))
+                {
+                    await Task.Delay(new TimeSpan(0, 0, 1), stoppingToken);
                     continue;
+                }
 
                 if(!(await BackgroundExecuteAsync(stoppingToken)))
                     continue;
