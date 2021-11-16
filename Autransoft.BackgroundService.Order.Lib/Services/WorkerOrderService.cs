@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Autransoft.BackgroundService.Order.Lib.Attributes;
-using Autransoft.BackgroundService.Order.Lib.Logging;
+using Autransoft.BackgroundService.Order.Lib.Loggings;
 using Autransoft.BackgroundService.Order.Lib.Repositories;
 
 namespace Autransoft.BackgroundService.Order.Lib.Services
@@ -9,19 +9,19 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
     public class WorkerOrderService
     {
         private WorkerRepository _repository;
-        private Logger _logger;
+        private Logging _logger;
 
         public WorkerOrderService()
         {
             _repository = new WorkerRepository();
-            _logger = new Logger();
+            _logger = new Logging();
         }
 
         public void EndExecution(Type type)
         {
             var worker = _repository.UpdateWorker(type, true);
 
-            _logger.LogInformation(worker);
+            _logger.LogStatusWorkerOrder(worker);
         }
 
         public void RestartAllWorkers()
@@ -33,7 +33,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             foreach(var worker in workers)
                 _repository.UpdateWorker(worker.Type, false);
 
-            _logger.Restart(workers);
+            _logger.LogRestart(workers);
         }
 
         public void Save(Type type)
@@ -47,7 +47,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 foreach(var dependency in dependencies)
                     _repository.Add(type, dependency);
 
-            _logger.LogInformation(worker);
+            _logger.LogStatusWorkerOrder(worker);
         }
 
         public int GetIndex(Type type) => _repository.GetIndex(type);
