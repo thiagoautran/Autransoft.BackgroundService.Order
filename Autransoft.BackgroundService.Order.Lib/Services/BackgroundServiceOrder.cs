@@ -19,28 +19,17 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("Executed");
-                await Task.Delay(new TimeSpan(0, 0, 2), stoppingToken);
-
-                if(_service.Executed(GetType()))
+                var executed = _service.Executed(GetType());
+                if(executed != null && executed.Value)
                     continue;
-
-                Console.WriteLine("AllDependencyExecuted");
-                await Task.Delay(new TimeSpan(0, 0, 2), stoppingToken);
 
                 if(!_service.AllDependencyExecuted(GetType()))
                     continue;
 
-                Console.WriteLine("BackgroundExecuteAsync");
-                await Task.Delay(new TimeSpan(0, 0, 2), stoppingToken);
-
                 if(!(await BackgroundExecuteAsync(stoppingToken)))
                     continue;
 
-                Console.WriteLine("EndExecution");
-                await Task.Delay(new TimeSpan(0, 0, 2), stoppingToken);
-
-                _service.EndExecution();
+                _service.EndExecution(GetType());
 
                 await Task.Delay(new TimeSpan(0, 0, _service.GetIndex(GetType())), stoppingToken);
 

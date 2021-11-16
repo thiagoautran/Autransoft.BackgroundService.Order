@@ -17,9 +17,10 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             _logger = new Logger();
         }
 
-        public void EndExecution()
+        public void EndExecution(Type type)
         {
-            var worker = _repository.UpdateWorker(GetType(), true);
+            var worker = _repository.UpdateWorker(type, true);
+
             _logger.LogInformation(worker);
         }
 
@@ -51,7 +52,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
         public int GetIndex(Type type) => _repository.GetIndex(type);
         
-        public bool Executed(Type type) => _repository.Get(type).Executed;
+        public bool? Executed(Type type) => _repository.Get(type)?.Executed;
 
         public bool AllDependencyExecuted(Type type) => _repository.AllDependencyExecuted(type);
     }

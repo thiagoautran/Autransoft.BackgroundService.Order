@@ -78,12 +78,12 @@ namespace Autransoft.BackgroundService.Order.Lib.Repositories
             return worker;
         }
 
-        private WorkerEntity GetWorker(Type worker)
+        private WorkerEntity GetWorker(Type type)
         {
-            if(worker == null)
+            if(type == null)
                 return null;
 
-            return Database.FirstOrDefault(key => key.Type == worker);
+            return Database.FirstOrDefault(key => key.Type == type);
         } 
 
         private void AddDependency(Type worker, Type dependency)
