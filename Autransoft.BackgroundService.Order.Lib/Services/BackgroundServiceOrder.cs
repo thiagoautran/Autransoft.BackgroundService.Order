@@ -32,7 +32,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                     continue;
                 }
 
-                if(!(await BackgroundExecuteAsync(stoppingToken)))
+                if(!(await ExecuteAsync(stoppingToken, _service.GetSharedObject())))
                     continue;
 
                 _service.EndExecution(GetType());
@@ -41,6 +41,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             }
         }
 
-        protected abstract Task<bool> BackgroundExecuteAsync(CancellationToken stoppingToken);
+        protected abstract Task<bool> ExecuteAsync(CancellationToken stoppingToken, object sharedObject);
+
+        protected void SharedObjectToAllWorkers(object obj) => _service.SharedObjectToAllWorkers(obj);
     }
 }

@@ -12,6 +12,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
         private Logging _logger;
 
         private static bool _isRestartAllWorkersRunnig;
+        private static object _obj;
 
         public WorkerOrderService()
         {
@@ -19,6 +20,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             _logger = new Logging();
 
             _isRestartAllWorkersRunnig = false;
+            _obj = null;
         }
 
         public void EndExecution(Type type)
@@ -34,6 +36,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 return;
 
             _isRestartAllWorkersRunnig = true;
+            _obj = null;
 
             try
             {
@@ -65,8 +68,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
             _logger.LogStatusWorkerOrder(worker);
         }
-
-        public int GetIndex(Type type) => _repository.GetIndex(type);
         
         public bool? Executed(Type type)
         {
@@ -83,5 +84,9 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
             return _repository.AllDependencyExecuted(type);
         }
+
+        public object GetSharedObject() => _obj;
+
+        public void SharedObjectToAllWorkers(object obj) => _obj = obj;
     }
 }

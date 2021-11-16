@@ -24,18 +24,19 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
         {
             var log = new StringBuilder();
             _logId = Guid.NewGuid();
+            var date = DateTime.Now;
             
-            log.AppendLine("Restart started");
+            log.AppendLine($"Id:{LogId}|{date.ToString("dd/MM/yyyy hh:mm:ss")}|Restart started");
 
             foreach(var worker in workers)
             {
                 if(worker.Dependencies.Count() == 0)
-                    log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}");
+                    log.AppendLine($"Id:{LogId}|{date.ToString("dd/MM/yyyy hh:mm:ss")}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}");
                 else
-                    log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
+                    log.AppendLine($"Id:{LogId}|{date.ToString("dd/MM/yyyy hh:mm:ss")}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
             }
 
-            log.Append("Restart finished");
+            log.Append($"Id:{LogId}|{date.ToString("dd/MM/yyyy hh:mm:ss")}|Restart finished");
 
             Console.WriteLine(log.ToString());
         }
@@ -45,9 +46,9 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
             var log = string.Empty;
 
             if(worker.Dependencies.Count() == 0)
-                log = $"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}";
+                log = $"Id:{LogId}|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}";
             else
-                log = $"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}";
+                log = $"Id:{LogId}|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}";
 
             Console.WriteLine(log);
         }
