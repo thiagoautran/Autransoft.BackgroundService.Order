@@ -20,7 +20,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
             }
         }
 
-        internal string LogRestart(IEnumerable<WorkerEntity> workers)
+        internal void LogRestart(IEnumerable<WorkerEntity> workers)
         {
             var log = new StringBuilder();
             _logId = Guid.NewGuid();
@@ -36,11 +36,9 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
             }
 
             Console.WriteLine(log.ToString());
-
-            return log.ToString();
         }
 
-        internal string LogStatusWorkerOrder(WorkerEntity worker)
+        internal void LogStatusWorkerOrder(WorkerEntity worker)
         {
             var log = new StringBuilder();
 
@@ -50,8 +48,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
                 log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
 
             Console.WriteLine(log.ToString());
-
-            return log.ToString();
         }
     }
 }
