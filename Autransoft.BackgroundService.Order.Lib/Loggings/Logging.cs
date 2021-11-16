@@ -35,6 +35,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
                     log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
             }
 
+            Console.WriteLine(log.ToString());
+
             return log.ToString();
         }
 
@@ -46,6 +48,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Loggings
                 log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}");
             else
                 log.AppendLine($"Id:{LogId}|Executed:{worker.Executed}|WorkerName:{worker.Type.Name}|Dependencies:{string.Join( ",", worker.Dependencies.Select(x => x.Type.Name))}");
+
+            Console.WriteLine(log.ToString());
 
             return log.ToString();
         }
