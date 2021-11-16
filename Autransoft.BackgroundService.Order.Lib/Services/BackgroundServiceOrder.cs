@@ -31,8 +31,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
                 _service.EndExecution(GetType());
 
-                await Task.Delay(new TimeSpan(0, 0, 1 + _service.GetIndex(GetType()) > 0 ? 1 : 0), stoppingToken);
-
                 _service.RestartAllWorkers();
             }
         }

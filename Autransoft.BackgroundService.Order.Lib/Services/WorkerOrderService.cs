@@ -6,15 +6,19 @@ using Autransoft.BackgroundService.Order.Lib.Repositories;
 
 namespace Autransoft.BackgroundService.Order.Lib.Services
 {
-    public class WorkerOrderService
+    internal class WorkerOrderService
     {
         private WorkerRepository _repository;
         private Logging _logger;
+
+        private static bool _isRestartAllWorkersRunnig;
 
         public WorkerOrderService()
         {
             _repository = new WorkerRepository();
             _logger = new Logging();
+
+            _isRestartAllWorkersRunnig = false;
         }
 
         public void EndExecution(Type type)
@@ -26,6 +30,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
         public void RestartAllWorkers()
         {
+            _isRestartAllWorkersRunnig = true;
+
             var workers = _repository.Get();
             if(workers.Any(worker => !worker.Executed))
                 return;
@@ -34,6 +40,8 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 _repository.UpdateWorker(worker.Type, false);
 
             _logger.LogRestart(workers);
+
+            _isRestartAllWorkersRunnig = false;
         }
 
         public void Save(Type type)
@@ -52,8 +60,20 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
 
         public int GetIndex(Type type) => _repository.GetIndex(type);
         
-        public bool? Executed(Type type) => _repository.Get(type)?.Executed;
+        public bool? Executed(Type type)
+        {
+            if(_isRestartAllWorkersRunnig)
+                return true;
 
-        public bool AllDependencyExecuted(Type type) => _repository.AllDependencyExecuted(type);
+            return _repository.Get(type)?.Executed;
+        } 
+
+        public bool AllDependencyExecuted(Type type) 
+        { 
+            if(_isRestartAllWorkersRunnig)
+                return false;
+
+            return _repository.AllDependencyExecuted(type);
+        }
     }
 }
