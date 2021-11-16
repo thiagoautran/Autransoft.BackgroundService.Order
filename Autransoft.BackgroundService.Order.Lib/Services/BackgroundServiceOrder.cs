@@ -8,13 +8,11 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
     {
         private WorkerOrderService _service;
 
-        public BackgroundServiceOrder() : base() => _service = new WorkerOrderService();
-
-        public async override Task StartAsync(CancellationToken cancellationToken)
+        protected BackgroundServiceOrder() : base() 
         {
-            _service.Save(GetType());
+            _service = new WorkerOrderService();
 
-            await BackgroundStartAsync(cancellationToken);
+            _service.Save(GetType());
         }
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,12 +47,6 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 _service.RestartAllWorkers();
             }
         }
-
-        public async override Task StopAsync(CancellationToken cancellationToken) => await BackgroundStopAsync(cancellationToken);
-
-        public virtual Task BackgroundStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public virtual Task BackgroundStopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         protected abstract Task<bool> BackgroundExecuteAsync(CancellationToken stoppingToken);
     }
