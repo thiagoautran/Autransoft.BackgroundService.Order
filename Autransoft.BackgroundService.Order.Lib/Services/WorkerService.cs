@@ -6,21 +6,21 @@ using Autransoft.BackgroundService.Order.Lib.Repositories;
 
 namespace Autransoft.BackgroundService.Order.Lib.Services
 {
-    internal class WorkerOrderService
+    internal class WorkerService
     {
+        private SharedObjectRepository _sharedObjectRepository;
         private WorkerRepository _repository;
         private Logging _logger;
 
         private static bool _isRestartAllWorkersRunnig;
-        private static object _obj;
 
-        public WorkerOrderService()
+        public WorkerService()
         {
+            _sharedObjectRepository = new SharedObjectRepository();
             _repository = new WorkerRepository();
             _logger = new Logging();
 
             _isRestartAllWorkersRunnig = false;
-            _obj = null;
         }
 
         public void EndExecution(Type type)
@@ -36,7 +36,7 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
                 return;
 
             _isRestartAllWorkersRunnig = true;
-            _obj = null;
+            _sharedObjectRepository.Clean();
 
             try
             {
@@ -64,7 +64,10 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             var worker = _repository.Add(type);
             if(dependencies != null)
                 foreach(var dependency in dependencies)
-                    _repository.Add(type, dependency);
+                {
+                    _repository.Add(dependency);
+                    _repository.AddDependency(type, dependency);
+                }
 
             _logger.LogStatusWorkerOrder(worker);
         }
@@ -82,11 +85,14 @@ namespace Autransoft.BackgroundService.Order.Lib.Services
             if(_isRestartAllWorkersRunnig)
                 return false;
 
-            return _repository.AllDependencyExecuted(type);
+            var key = _repository.GetWorker(type);
+            if(key == null)
+                return false;
+
+            if(key.Dependencies.Count() == 0)
+                return true;
+                
+            return !key.Dependencies.Any(dependency => !dependency.Executed);
         }
-
-        public object GetSharedObject() => _obj;
-
-        public void SharedObjectToAllWorkers(object obj) => _obj = obj;
     }
 }
